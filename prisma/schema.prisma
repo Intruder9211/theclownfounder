@@ -1,0 +1,126 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+model Workspace {
+  id                  String     @id @default(uuid())
+  name                String
+  companyType         String?    // Software Agency, SaaS, Consultancy, Startup, Other
+  website             String?
+  timezone            String?
+  workingHours        String?
+  currency            String?    @default("USD")
+  isDemo              Boolean    @default(false)
+  onboardingCompleted Boolean    @default(false)
+  tourCompleted       Boolean    @default(false)
+  showContextualHelp  Boolean    @default(true)
+  brainContent        String?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  proposals           Proposal[]
+  clients             Client[]
+  projects            Project[]
+}
+
+model Client {
+  id             String     @id @default(uuid())
+  workspaceId    String
+  workspace      Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name           String
+  email          String
+  company        String?
+  phone          String?
+  website        String?
+  contractType   String?
+  notes          String?
+  assignedAgents String?    // JSON stringified array of agent IDs e.g. ["developer","qa","support","devops"]
+  type           String     @default("CLIENT") // "LEAD" | "CLIENT"
+  source         String     @default("Gmail")  // "Gmail" | "Manual"
+  status         String     @default("ACTIVE")
+  createdAt      DateTime   @default(now())
+  projects       Project[]
+  proposals      Proposal[]
+}
+
+model Project {
+  id             String    @id @default(uuid())
+  workspaceId    String
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clientId       String?
+  client         Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  name           String
+  assignedAgents String?   // JSON stringified array of agent IDs
+  isCompleted    Boolean   @default(false)
+  developerNotes String?
+  status         String    @default("ACTIVE")
+  createdAt      DateTime  @default(now())
+}
+
+model Proposal {
+  id              String     @id @default(uuid())
+  workspaceId     String?
+  workspace       Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clientId        String?
+  client          Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  isNewClientLead Boolean    @default(false)
+  detectedCompany String?
+  detectedContact String?
+  suggestedType   String?    @default("LEAD")
+  status          String     @default("PENDING") // PENDING, APPROVED, REJECTED, IGNORED
+  senderEmail     String
+  senderName      String?
+  subject         String
+  bodyText        String
+  draftReply      String
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Agent {
+  id          String   @id // e.g. "sales", "marketing", "support", etc.
+  name        String
+  role        String
+  description String
+  directives  String
+  isActive    Boolean  @default(true)
+  logs        Log[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  agentId   String
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  timestamp String
+  action    String
+  details   String
+  status    String   @default("success") // success, running, paused
+  createdAt DateTime @default(now())
+}
+
+model Meeting {
+  id             String           @id @default(uuid())
+  title          String
+  type           String           // "one-on-one" | "all-hands" | "custom"
+  agentId        String?          // nullable, references Agent.id if 1-on-1
+  participantIds String?          // comma-separated agent IDs for custom group huddles
+  status         String           @default("ACTIVE") // ACTIVE | COMPLETED
+  createdAt      DateTime         @default(now())
+  messages       MeetingMessage[]
+}
+
+model MeetingMessage {
+  id         String   @id @default(uuid())
+  meetingId  String
+  meeting    Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  senderId   String   // "founder" | agent.id
+  senderName String
+  bodyText   String
+  createdAt  DateTime @default(now())
+}
