@@ -144,7 +144,7 @@ export default function DashboardPage() {
           ...a,
           logs: a.logs.map((l) => ({
             ...l,
-            status: l.status as "success" | "running" | "paused"
+            status: (l as any).status as "success" | "running" | "paused" || "success"
           }))
         }))
       );

@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
-import { Inbox, Brain, Settings, ShieldCheck, Cpu, BarChart3, Video, Maximize2, Minimize2, Users, Plus } from "lucide-react";
+import { Inbox, Brain, Settings, ShieldCheck, Cpu, BarChart3, Video, Maximize2, Minimize2, Users } from "lucide-react";
 import { ClownAiLogoMark } from "@/app/components/ClownAiLogoMark";
-import { AddAgentModal } from "./AddAgentModal";
 
 interface SidebarProps {
   currentTab: string;
@@ -73,8 +72,6 @@ export function Sidebar({ currentTab, setTab, pendingCount, agents }: SidebarPro
       setWidth((prev) => Math.min(Math.max(prev + e.deltaX * 0.5, 200), 480));
     }
   };
-
-  const [isAddAgentOpen, setIsAddAgentOpen] = useState(false);
 
   return (
     <>
@@ -300,42 +297,9 @@ export function Sidebar({ currentTab, setTab, pendingCount, agents }: SidebarPro
                 </button>
               );
             })}
-
-            {/* Founder Add Custom AI Department Button */}
-            <button
-              type="button"
-              onClick={() => setIsAddAgentOpen(true)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                width: "100%",
-                padding: "6px 12px",
-                borderRadius: "6px",
-                backgroundColor: "rgba(99, 102, 241, 0.1)",
-                color: "hsl(var(--accent))",
-                cursor: "pointer",
-                fontSize: "12px",
-                fontWeight: 600,
-                border: "1px dashed rgba(99, 102, 241, 0.3)",
-                textAlign: "left",
-                marginTop: "4px"
-              }}
-            >
-              <Plus size={14} />
-              <span>Add AI Department</span>
-            </button>
           </div>
         </div>
       </div>
-
-      <AddAgentModal
-        isOpen={isAddAgentOpen}
-        onClose={() => setIsAddAgentOpen(false)}
-        onAgentCreated={() => {
-          window.location.reload();
-        }}
-      />
 
       {/* Footer System Status */}
       <div
