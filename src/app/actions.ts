@@ -226,6 +226,15 @@ const MOCK_AGENTS = [
   }
 ];
 
+// Global Fallback In-Memory State for Serverless Deployments (Vercel)
+let proposalsStore: any[] = MOCK_PROPOSALS.map((p) => ({ ...p, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }));
+let agentsStore: any[] = MOCK_AGENTS.map((a) => ({
+  ...a,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  logs: (a.logs || []).map((l) => ({ ...l, id: `log-${Math.random()}`, agentId: a.id, createdAt: new Date().toISOString() }))
+}));
+
 // Helper to seed agents automatically if empty (without hardcoded logs for production)
 export async function seedAgents() {
   try {
@@ -365,12 +374,8 @@ export async function getProposals(isDemo: boolean = false) {
     console.error("Error loading proposals from SQLite:", err);
   }
 
-  // Fallback to MOCK_PROPOSALS if database is empty or read-only on deployment
-  return MOCK_PROPOSALS.map((p) => ({
-    ...p,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
+  // Fallback to proposalsStore if database is empty or read-only on deployment
+  return proposalsStore;
 }
 
 // Fetch all agents with their timeline logs
@@ -400,54 +405,77 @@ export async function getAgents() {
     console.error("Error loading agents from database:", err);
   }
 
-  // Fallback to pre-defined MOCK_AGENTS (localhost AI roster) if database is empty or read-only
-  return MOCK_AGENTS.map((a) => ({
-    ...a,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    logs: (a.logs || []).map((l) => ({
-      ...l,
-      id: `log-${Math.random()}`,
-      agentId: a.id,
-      createdAt: new Date().toISOString()
-    }))
-  }));
+  // Fallback to agentsStore (localhost AI roster) if database is empty or read-only
+  return agentsStore;
 }
 
 // Update proposal draft response inline
 export async function updateProposalDraft(id: string, text: string) {
-  const updated = await db.proposal.update({
-    where: { id },
-    data: { draftReply: text }
-  });
+  try {
+    const updated = await db.proposal.update({
+      where: { id },
+      data: { draftReply: text }
+    });
+    revalidatePath("/");
+    return {
+      ...updated,
+      createdAt: updated.createdAt.toISOString(),
+      updatedAt: updated.updatedAt.toISOString()
+    };
+  } catch (err) {
+    console.warn("updateProposalDraft fallback to in-memory store:", err);
+  }
+
+  const prop = proposalsStore.find((p) => p.id === id);
+  if (prop) {
+    prop.draftReply = text;
+    prop.updatedAt = new Date().toISOString();
+  }
   revalidatePath("/");
-  return {
-    ...updated,
-    createdAt: updated.createdAt.toISOString(),
-    updatedAt: updated.updatedAt.toISOString()
-  };
+  return prop || { id, draftReply: text, status: "PENDING" };
 }
 
 // Approve proposal (Simulates Resend API call)
 export async function approveProposal(id: string) {
-  const proposal = await db.proposal.findUnique({ where: { id } });
-  if (!proposal) throw new Error("Proposal not found");
+  try {
+    const proposal = await db.proposal.findUnique({ where: { id } });
+    if (proposal) {
+      await db.proposal.update({
+        where: { id },
+        data: { status: "APPROVED" }
+      });
 
-  // Update proposal state
-  await db.proposal.update({
-    where: { id },
-    data: { status: "APPROVED" }
-  });
+      await safeCreateLog(
+        "support",
+        "Approved Support Draft Sent",
+        `Email sent to ${proposal.senderEmail} regarding: '${proposal.subject}'.`
+      );
 
-  // Log action on Support Agent
-  await db.log.create({
-    data: {
+      revalidatePath("/");
+      return { success: true };
+    }
+  } catch (err) {
+    console.warn("approveProposal fallback to in-memory store:", err);
+  }
+
+  const prop = proposalsStore.find((p) => p.id === id);
+  if (prop) {
+    prop.status = "APPROVED";
+    prop.updatedAt = new Date().toISOString();
+  }
+
+  const supportAgent = agentsStore.find((a) => a.id === "support");
+  if (supportAgent) {
+    supportAgent.logs = supportAgent.logs || [];
+    supportAgent.logs.unshift({
+      id: `log-${Date.now()}`,
       agentId: "support",
       timestamp: "Just now",
       action: "Approved Support Draft Sent",
-      details: `Email sent to ${proposal.senderEmail} regarding: '${proposal.subject}'.`
-    }
-  });
+      details: `Email sent to ${prop ? prop.senderEmail : "client"} regarding: '${prop ? prop.subject : "proposal"}'.`,
+      createdAt: new Date().toISOString()
+    });
+  }
 
   revalidatePath("/");
   return { success: true };
@@ -455,24 +483,45 @@ export async function approveProposal(id: string) {
 
 // Reject proposal (Logs rejections and feedback)
 export async function rejectProposal(id: string, feedback: string) {
-  const proposal = await db.proposal.findUnique({ where: { id } });
-  if (!proposal) throw new Error("Proposal not found");
+  try {
+    const proposal = await db.proposal.findUnique({ where: { id } });
+    if (proposal) {
+      await db.proposal.update({
+        where: { id },
+        data: { status: "REJECTED" }
+      });
 
-  // Update proposal state
-  await db.proposal.update({
-    where: { id },
-    data: { status: "REJECTED" }
-  });
+      await safeCreateLog(
+        "support",
+        "Draft Rejected with Feedback",
+        `Rejected reply for ${proposal.senderEmail}. Feedback: "${feedback}".`
+      );
 
-  // Log rejection details on Support Agent logs
-  await db.log.create({
-    data: {
+      revalidatePath("/");
+      return { success: true };
+    }
+  } catch (err) {
+    console.warn("rejectProposal fallback to in-memory store:", err);
+  }
+
+  const prop = proposalsStore.find((p) => p.id === id);
+  if (prop) {
+    prop.status = "REJECTED";
+    prop.updatedAt = new Date().toISOString();
+  }
+
+  const supportAgent = agentsStore.find((a) => a.id === "support");
+  if (supportAgent) {
+    supportAgent.logs = supportAgent.logs || [];
+    supportAgent.logs.unshift({
+      id: `log-${Date.now()}`,
       agentId: "support",
       timestamp: "Just now",
       action: "Draft Rejected with Feedback",
-      details: `Rejected reply for ${proposal.senderEmail}. Feedback: "${feedback}".`
-    }
-  });
+      details: `Rejected reply for ${prop ? prop.senderEmail : "client"}. Feedback: "${feedback}".`,
+      createdAt: new Date().toISOString()
+    });
+  }
 
   revalidatePath("/");
   return { success: true };

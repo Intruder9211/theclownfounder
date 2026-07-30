@@ -142,9 +142,9 @@ export default function DashboardPage() {
       setAgents(
         aList.map((a) => ({
           ...a,
-          logs: a.logs.map((l) => ({
+          logs: (a.logs || []).map((l: any) => ({
             ...l,
-            status: (l as any).status as "success" | "running" | "paused" || "success"
+            status: (l.status as "success" | "running" | "paused") || "success"
           }))
         }))
       );
