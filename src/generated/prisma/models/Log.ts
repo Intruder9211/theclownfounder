@@ -428,6 +428,7 @@ export type LogCreateOrConnectWithoutAgentInput = {
 
 export type LogCreateManyAgentInputEnvelope = {
   data: Prisma.LogCreateManyAgentInput | Prisma.LogCreateManyAgentInput[]
+  skipDuplicates?: boolean
 }
 
 export type LogUpsertWithWhereUniqueWithoutAgentInput = {
@@ -1229,6 +1230,7 @@ export type LogCreateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * The data used to create many Logs.
    */
   data: Prisma.LogCreateManyInput | Prisma.LogCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1247,6 +1249,7 @@ export type LogCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.
    * The data used to create many Logs.
    */
   data: Prisma.LogCreateManyInput | Prisma.LogCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

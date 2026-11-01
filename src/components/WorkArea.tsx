@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, X, CreditCard, Sparkles, UserPlus, Building2, CheckCircle2 } from "lucide-react";
+import { Check, X, CreditCard, Sparkles, UserPlus } from "lucide-react";
 import { ProposalItem } from "./ProposalList";
 import { approveNewClientProposal } from "@/app/actions";
 
@@ -22,6 +22,8 @@ export function WorkArea({
   updateDraft,
   editorRef
 }: WorkAreaProps) {
+  const [isProcessingLead, setIsProcessingLead] = useState(false);
+
   if (!proposal) {
     return (
       <div
@@ -39,8 +41,6 @@ export function WorkArea({
       </div>
     );
   }
-
-  const [isProcessingLead, setIsProcessingLead] = useState(false);
 
   const handleCreateClientFromProposal = async () => {
     try {

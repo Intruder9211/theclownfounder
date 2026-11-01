@@ -227,8 +227,8 @@ const MOCK_AGENTS = [
 ];
 
 // Global Fallback In-Memory State for Serverless Deployments (Vercel)
-let proposalsStore: any[] = MOCK_PROPOSALS.map((p) => ({ ...p, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }));
-let agentsStore: any[] = MOCK_AGENTS.map((a) => ({
+const proposalsStore: any[] = MOCK_PROPOSALS.map((p) => ({ ...p, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }));
+const agentsStore: any[] = MOCK_AGENTS.map((a) => ({
   ...a,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -588,7 +588,7 @@ export async function runAgentAutonomousTask(id: string, customInstruction?: str
     });
   }
 
-  let actionTitle = customInstruction ? `Executed Directive: "${customInstruction.slice(0, 30)}..."` : "Autonomous Work Cycle Executed";
+  const actionTitle = customInstruction ? `Executed Directive: "${customInstruction.slice(0, 30)}..."` : "Autonomous Work Cycle Executed";
   let detailsText = "";
 
   // Gemini AI execution if key is present
@@ -1421,7 +1421,7 @@ export async function approveNewClientProposal(
   const proposal = await db.proposal.findUnique({ where: { id: proposalId } });
   if (!proposal) throw new Error("Proposal not found");
 
-  let ws = await db.workspace.findFirst({ where: { isDemo: false } });
+  const ws = await db.workspace.findFirst({ where: { isDemo: false } });
   const wsId = ws ? ws.id : "default-ws";
 
   if (actionType === "CREATE") {
@@ -1609,7 +1609,7 @@ let analyticsInsightsStore = [
   { id: "insight-2", title: "Optimize Developer QA Cycle", impact: "-1.5h saved/project", detail: "QA AI verification passes 98% of developer task logs on first attempt." }
 ];
 
-let hrMetricsStore = [
+const hrMetricsStore = [
   { agent: "Developer AI", accuracy: "98%", completedTasks: 24, load: "Medium" },
   { agent: "Support AI", accuracy: "99%", completedTasks: 42, load: "High" },
   { agent: "QA AI", accuracy: "97%", completedTasks: 19, load: "Low" },
@@ -1638,7 +1638,7 @@ let supportFaqsStore = [
   { id: "faq-1", question: "How to check project progress?", answer: "Project progress is logged in real-time by Developer AI & QA AI." }
 ];
 
-let financeTransactionsStore = [
+const financeTransactionsStore = [
   { id: "tx-1", type: "REVENUE", category: "Retainer SOW", amount: "+$2,500", client: "Acme Corp" }
 ];
 
@@ -1764,7 +1764,7 @@ export async function addDeveloperCommit(data: { commitMsg: string; prNumber?: s
 
 // Founder Manual Task & Project Creation
 export async function addProjectToClient(clientId: string, name: string) {
-  let ws = await db.workspace.findFirst({ where: { isDemo: false } });
+  const ws = await db.workspace.findFirst({ where: { isDemo: false } });
   const wsId = ws ? ws.id : "default-ws";
 
   const project = await db.project.create({
@@ -1816,7 +1816,7 @@ export async function createCustomAgent(data: { name: string; role: string; desc
 }
 
 // Client Support Chat In-Memory Persistent Store
-let clientSupportChatsStore: Record<string, Array<{ id: string; sender: "client" | "support-ai"; senderName: string; body: string; timestamp: string }>> = {};
+const clientSupportChatsStore: Record<string, Array<{ id: string; sender: "client" | "support-ai"; senderName: string; body: string; timestamp: string }>> = {};
 
 // Client Portal Data Provider (Strictly Scoped for Client Email)
 export async function getClientPortalData(clientEmail: string) {

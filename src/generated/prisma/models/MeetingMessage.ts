@@ -404,6 +404,7 @@ export type MeetingMessageCreateOrConnectWithoutMeetingInput = {
 
 export type MeetingMessageCreateManyMeetingInputEnvelope = {
   data: Prisma.MeetingMessageCreateManyMeetingInput | Prisma.MeetingMessageCreateManyMeetingInput[]
+  skipDuplicates?: boolean
 }
 
 export type MeetingMessageUpsertWithWhereUniqueWithoutMeetingInput = {
@@ -1194,6 +1195,7 @@ export type MeetingMessageCreateManyArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many MeetingMessages.
    */
   data: Prisma.MeetingMessageCreateManyInput | Prisma.MeetingMessageCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1212,6 +1214,7 @@ export type MeetingMessageCreateManyAndReturnArgs<ExtArgs extends runtime.Types.
    * The data used to create many MeetingMessages.
    */
   data: Prisma.MeetingMessageCreateManyInput | Prisma.MeetingMessageCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

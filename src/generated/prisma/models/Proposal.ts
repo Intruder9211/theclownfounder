@@ -664,6 +664,7 @@ export type ProposalCreateOrConnectWithoutWorkspaceInput = {
 
 export type ProposalCreateManyWorkspaceInputEnvelope = {
   data: Prisma.ProposalCreateManyWorkspaceInput | Prisma.ProposalCreateManyWorkspaceInput[]
+  skipDuplicates?: boolean
 }
 
 export type ProposalUpsertWithWhereUniqueWithoutWorkspaceInput = {
@@ -744,6 +745,7 @@ export type ProposalCreateOrConnectWithoutClientInput = {
 
 export type ProposalCreateManyClientInputEnvelope = {
   data: Prisma.ProposalCreateManyClientInput | Prisma.ProposalCreateManyClientInput[]
+  skipDuplicates?: boolean
 }
 
 export type ProposalUpsertWithWhereUniqueWithoutClientInput = {
@@ -1688,6 +1690,7 @@ export type ProposalCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * The data used to create many Proposals.
    */
   data: Prisma.ProposalCreateManyInput | Prisma.ProposalCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1706,6 +1709,7 @@ export type ProposalCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * The data used to create many Proposals.
    */
   data: Prisma.ProposalCreateManyInput | Prisma.ProposalCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

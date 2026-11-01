@@ -176,7 +176,7 @@ export function Tooltip({
             className="text-[10px] text-[#71717a] hover:text-red-400 transition-colors font-mono hover:underline"
             title="Don't show tour again"
           >
-            Don't show again
+            Don&apos;t show again
           </button>
 
           <div className="flex items-center gap-1.5">

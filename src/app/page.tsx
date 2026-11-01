@@ -5,21 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
   ArrowRight, 
-  CheckCircle2, 
   Play, 
   X, 
-  MessageSquarePlus,
-  ShieldCheck,
-  Zap,
-  Terminal,
-  Brain,
-  Cpu,
-  Lock,
-  Sparkles,
-  Inbox,
-  FileText,
-  DollarSign,
-  Clock
+  MessageSquarePlus
 } from "lucide-react";
 import { ClownAiLogoMark } from "./components/ClownAiLogoMark";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -870,7 +858,7 @@ export default function LandingPage() {
                         <span>VERIFIED FOUNDER</span>
                         <span className="text-emerald-400">✓ {rev.metric}</span>
                       </div>
-                      <p className="text-xs text-[#a1a1aa] leading-relaxed">"{rev.text}"</p>
+                      <p className="text-xs text-[#a1a1aa] leading-relaxed">&ldquo;{rev.text}&rdquo;</p>
                     </div>
                     <div className="pt-4 border-t border-[#27272a]/60 flex items-center justify-between text-xs">
                       <div>

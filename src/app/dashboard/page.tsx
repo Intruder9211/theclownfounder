@@ -8,7 +8,7 @@ import { MockTriggers } from "@/components/MockTriggers";
 import { BrainView } from "@/components/BrainView";
 import { CommandBar } from "@/components/CommandBar";
 import { RejectionPanel } from "@/components/RejectionPanel";
-import { AgentView, AgentProfile } from "@/components/AgentView";
+import { AgentView, AgentProfile, LogEntry } from "@/components/AgentView";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { DashboardView } from "@/components/DashboardView";
 import { MeetingRoom } from "@/components/MeetingRoom";
@@ -23,8 +23,7 @@ import {
   saveAgentDirectives,
   runAgentAutonomousTask,
   triggerMockProposal,
-  createProductionWorkspace,
-  createDemoWorkspace
+  createProductionWorkspace
 } from "@/app/actions";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { TourProvider, useTour } from "@/components/tour/TourProvider";
@@ -92,38 +91,22 @@ export default function DashboardPage() {
     setGeminiKey(key);
     try {
       localStorage.setItem("clownfounder_gemini_key", key);
-    } catch (e) {}
+    } catch {}
   };
 
   const handleUpdateStripeKey = (key: string) => {
     setStripeKey(key);
     try {
       localStorage.setItem("clownfounder_stripe_key", key);
-    } catch (e) {}
+    } catch {}
   };
 
   const handleUpdateResendKey = (key: string) => {
     setResendKey(key);
     try {
       localStorage.setItem("clownfounder_resend_key", key);
-    } catch (e) {}
+    } catch {}
   };
-
-  // Check URL parameters & local mode for Demo vs Production Onboarding
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const modeParam = params.get("mode");
-
-    if (modeParam === "demo" || localStorage.getItem("clownfounder_mode") === "demo") {
-      setIsDemo(true);
-      setOnboardingCompleted(true);
-      refreshData(true);
-    } else {
-      const isCompleted = localStorage.getItem("clownfounder_onboarding_completed") === "true";
-      setOnboardingCompleted(isCompleted);
-      refreshData(false);
-    }
-  }, []);
 
   // Synchronize SQLite data on load
   const refreshData = async (demoMode: boolean = false) => {
@@ -142,7 +125,7 @@ export default function DashboardPage() {
       setAgents(
         aList.map((a) => ({
           ...a,
-          logs: (a.logs || []).map((l: any) => ({
+          logs: (a.logs || []).map((l: LogEntry) => ({
             ...l,
             status: (l.status as "success" | "running" | "paused") || "success"
           }))
@@ -153,7 +136,23 @@ export default function DashboardPage() {
     }
   };
 
-  const handleOnboardingComplete = async (setupData: any) => {
+  // Check URL parameters & local mode for Demo vs Production Onboarding
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const modeParam = params.get("mode");
+
+    if (modeParam === "demo" || localStorage.getItem("clownfounder_mode") === "demo") {
+      setIsDemo(true);
+      setOnboardingCompleted(true);
+      refreshData(true);
+    } else {
+      const isCompleted = localStorage.getItem("clownfounder_onboarding_completed") === "true";
+      setOnboardingCompleted(isCompleted);
+      refreshData(false);
+    }
+  }, []);
+
+  const handleOnboardingComplete = async (setupData: Parameters<typeof createProductionWorkspace>[0]) => {
     try {
       await createProductionWorkspace(setupData);
       if (setupData.brainContent) {

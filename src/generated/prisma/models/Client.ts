@@ -651,6 +651,7 @@ export type ClientCreateOrConnectWithoutWorkspaceInput = {
 
 export type ClientCreateManyWorkspaceInputEnvelope = {
   data: Prisma.ClientCreateManyWorkspaceInput | Prisma.ClientCreateManyWorkspaceInput[]
+  skipDuplicates?: boolean
 }
 
 export type ClientUpsertWithWhereUniqueWithoutWorkspaceInput = {
@@ -1757,6 +1758,7 @@ export type ClientCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * The data used to create many Clients.
    */
   data: Prisma.ClientCreateManyInput | Prisma.ClientCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1775,6 +1777,7 @@ export type ClientCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many Clients.
    */
   data: Prisma.ClientCreateManyInput | Prisma.ClientCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */
